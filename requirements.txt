@@ -1,0 +1,12 @@
+fastapi
+pydantic
+uvicorn
+matplotlib
+scikit-fuzzy
+numpy
+SciPy
+NetworkX
+python-dotenv
+pathlib
+psycopg2-binary
+psycopg2

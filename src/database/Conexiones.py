@@ -1,0 +1,35 @@
+import psycopg2
+import psycopg2.extras
+import os
+import dotenv
+from dotenv import load_dotenv
+from pathlib import Path
+
+
+dotenv.load_dotenv('/code/src/.env', encoding='utf-8')
+
+# Database connection parameters
+db_params = {
+    "host": os.getenv('DBIP'),
+    "port": os.getenv('DBPORT'),
+    "database": os.getenv('DBDATABASE'),
+    "user": os.getenv('DBUSER'),
+    "password": os.getenv('DBPASS')
+}
+
+
+def conexion():
+    # Establish a connection to the PostgreSQL database
+    try:
+        connection = psycopg2.connect(**db_params)
+
+        # Create a cursor object to interact with the database
+        cursor = connection.cursor()
+        cur = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        return cur
+
+        
+       
+
+    except psycopg2.Error as error:
+        print("Error connecting to the database:", error)
