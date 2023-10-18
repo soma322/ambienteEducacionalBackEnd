@@ -25,16 +25,38 @@ def conexion():
     return rows
 @app.get("/tipping/{quality}/{service}")
 def tipping():
+    antencentesList = []
+    index = 0;
+    query = ""
     cur = con.conexion()
-    cur.execute("SELECT id, nombre, rangomin, rangomax, incremental FROM ctl_fuzzyconsecuencias where nombre ilike 'tip' and activo = true")
+    query = "SELECT id, nombre, rangomin, rangomax, incremental FROM ctl_fuzzyconsecuencias where nombre ilike 'tip' and activo = true"
+    cur.execute(query)
     res = cur.fetchall()
-    tip = obj.FuzzyConseuence(res[0][0],res[0][1],res[0][2],res[0][2],res[0][3])
+    tip = obj.FuzzyConsequence(res[0][0], res[0][1], res[0][2], res[0][3], res[0][4])
+
+    tip = ctrl.Consequent(res[0][1], res[0][2], res[0][3], res[0][4])
+
+    query = "SELECT id, nombre, rangomin,rangomax,incremental FROM ctl_fuzzyantecedentes WHERE consecuencia =%s and activo = true ORDER by id"
+    cur.execute(query, (tip.id,))
+    res = cur.fetchall()
+
+    #for ante in res:
+    #    antencentesList.insert(index,obj.FuzzyAntecentes(res[index][0],res[index][1],res[index][2],res[index][3],res[index][4]))
+    #    index = index + 1
+
+    antecedents = []
+    for ante in res:
+        antecedent = ctrl.Antecedent(ante[1], ante[2], ante[3], ante[4])
+        antecedents.append(antecedent)
+
+    return antecedents
+
 
     # Define universe variables
     x_quality = np.arange(0, 11, 1)
     x_service = np.arange(0, 11, 1)
-    x_tip = np.arange(tip['rangomin'], tip['rangomax'], tip['incremental'])
-    return tip
+    x_tip = np.arange(tip.rangomin ,tip.rangomax, tip.incremental)
+    return antencentesList
     
 
 @app.get("/fuzzy")
@@ -46,23 +68,29 @@ def check_fuzzy():
 
     # Create antecedent and consequent objects
     quality = ctrl.Antecedent(x_quality, 'quality')
-    service = ctrl.Antecedent(x_service, 'service')
-    tip = ctrl.Consequent(x_tip, 'tip')
-
     # Define membership functions for 'quality'
     quality['poor'] = fuzz.trimf(quality.universe, [0, 0, 5])
     quality['average'] = fuzz.trimf(quality.universe, [0, 5, 10])
     quality['good'] = fuzz.trimf(quality.universe, [5, 10, 10])
 
+    service = ctrl.Antecedent(x_service, 'service')
     # Define membership functions for 'service'
     service['poor'] = fuzz.trimf(service.universe, [0, 0, 5])
     service['average'] = fuzz.trimf(service.universe, [0, 5, 10])
     service['good'] = fuzz.trimf(service.universe, [5, 10, 10])
 
-    # Define membership functions for 'tip' (consequent)
+
+    tip = ctrl.Consequent(x_tip, 'tip')
+     # Define membership functions for 'tip' (consequent)
     tip['low'] = fuzz.trimf(tip.universe, [0, 0, 5])
     tip['medium'] = fuzz.trimf(tip.universe, [0, 5, 10])
     tip['high'] = fuzz.trimf(tip.universe, [5, 10, 10])
+
+    
+
+    
+
+   
 
     # Define fuzzy rules
     rule1 = ctrl.Rule(quality['poor'] | service['poor'], tip['low'])
