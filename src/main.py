@@ -6,7 +6,9 @@ import skfuzzy as fuzz
 import os
 from skfuzzy import control as ctrl
 
+
 from src.database import Conexiones as con
+from src.database import Queryobj as obj
 app = FastAPI()
 
 
@@ -21,6 +23,19 @@ def conexion():
     rows = cur.fetchall()
     colnames = [desc[0] for desc in cur.description]
     return rows
+@app.get("/tipping/{quality}/{service}")
+def tipping():
+    cur = con.conexion()
+    cur.execute("SELECT id, nombre, rangomin, rangomax, incremental FROM ctl_fuzzyconsecuencias where nombre ilike 'tip' and activo = true")
+    res = cur.fetchall()
+    tip = obj.FuzzyConseuence(res[0][0],res[0][1],res[0][2],res[0][2],res[0][3])
+
+    # Define universe variables
+    x_quality = np.arange(0, 11, 1)
+    x_service = np.arange(0, 11, 1)
+    x_tip = np.arange(tip['rangomin'], tip['rangomax'], tip['incremental'])
+    return tip
+    
 
 @app.get("/fuzzy")
 def check_fuzzy():

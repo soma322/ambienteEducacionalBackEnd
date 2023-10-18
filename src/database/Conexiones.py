@@ -1,5 +1,5 @@
 import psycopg2
-import psycopg2.extras
+from psycopg2 import extras
 import os
 import dotenv
 from dotenv import load_dotenv
