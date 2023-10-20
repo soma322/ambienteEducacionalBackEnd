@@ -1,6 +1,6 @@
 class FuzzyConsequence:
     def __init__(self, id, nombre, rangomin, rangomax, incremental):
-        self.id = id
+        self.idu = id
         self.nombre = nombre
         self.rangomin = rangomin
         self.rangomax = rangomax
@@ -8,16 +8,16 @@ class FuzzyConsequence:
 
 class FuzzyAntecentes:
     def __init__(self, id, nombre, rangomin, rangomax, incremental):
-        self.id = id
+        self.idu = id
         self.nombre = nombre
         self.rangomin = rangomin
         self.rangomax = rangomax
         self.incremental = incremental
 
 class FuzzyMembresia:
-    def __init__(self, id, nombre, rangomin, rangomax, incremental):
-        self.id = id
+    def __init__(self, id, nombre, rangomin, rangomax, rangofinal):
+        self.idu = id
         self.nombre = nombre
         self.rangomin = rangomin
         self.rangomax = rangomax
-        self.incremental = incremental
+        self.rangofinal = rangofinal

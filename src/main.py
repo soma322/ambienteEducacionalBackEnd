@@ -7,8 +7,8 @@ import os
 from skfuzzy import control as ctrl
 
 
-from src.database import Conexiones as con
-from src.database import Queryobj as obj
+from src.Database import Conexiones as con
+from src.Database import Queryobj as obj
 app = FastAPI()
 
 
@@ -26,27 +26,31 @@ def conexion():
 @app.get("/tipping/{quality}/{service}")
 def tipping():
     antencentesList = []
-    index = 0;
+    index = 0
     query = ""
     cur = con.conexion()
     query = "SELECT id, nombre, rangomin, rangomax, incremental FROM ctl_fuzzyconsecuencias where nombre ilike 'tip' and activo = true"
     cur.execute(query)
     res = cur.fetchall()
     tip = obj.FuzzyConsequence(res[0][0], res[0][1], res[0][2], res[0][3], res[0][4])
-
-    tip = ctrl.Consequent(res[0][1], res[0][2], res[0][3], res[0][4])
-
+    
+    x_tip = np.arange(tip.rangomin, tip.rangomax,tip.incremental)
+    tipConsequent = ctrl.Consequent(x_tip,tip.nombre)
+    print(tip)
+    
     query = "SELECT id, nombre, rangomin,rangomax,incremental FROM ctl_fuzzyantecedentes WHERE consecuencia =%s and activo = true ORDER by id"
-    cur.execute(query, (tip.id,))
+    cur.execute(query, (tip.idu,))
     res = cur.fetchall()
 
-    #for ante in res:
-    #    antencentesList.insert(index,obj.FuzzyAntecentes(res[index][0],res[index][1],res[index][2],res[index][3],res[index][4]))
-    #    index = index + 1
+
+    for ante in res:
+        antencentesList.append(obj.FuzzyAntecentes(ante[0],ante[1],ante[2],ante[3],ante[4]))
+       
 
     antecedents = []
-    for ante in res:
-        antecedent = ctrl.Antecedent(ante[1], ante[2], ante[3], ante[4])
+    for ante in antencentesList:
+        x_arange = np.arange(ante.rangomin, ante.rangomax, anto.incremental)
+        antecedent = ctrl.Antecedent(x_arange)
         antecedents.append(antecedent)
 
     return antecedents
