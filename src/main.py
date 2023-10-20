@@ -9,6 +9,8 @@ from skfuzzy import control as ctrl
 
 from src.Database import Conexiones as con
 from src.Database import Queryobj as obj
+from src.Model.FuzzyReglas    import Reglas  as reglas
+
 app = FastAPI()
 
 
@@ -24,8 +26,8 @@ def conexion():
     colnames = [desc[0] for desc in cur.description]
     return rows
 @app.get("/tipping/{quality}/{service}")
-def tipping():
-    antencentesList = []
+def tipping(quality: int,service: int):
+    antecedentesList = []
     index = 0
     query = ""
     cur = con.conexion()
@@ -36,7 +38,8 @@ def tipping():
     
     x_tip = np.arange(tip.rangomin, tip.rangomax,tip.incremental)
     tipConsequent = ctrl.Consequent(x_tip,tip.nombre)
-    print(tip)
+    
+   
     
     query = "SELECT id, nombre, rangomin,rangomax,incremental FROM ctl_fuzzyantecedentes WHERE consecuencia =%s and activo = true ORDER by id"
     cur.execute(query, (tip.idu,))
@@ -44,23 +47,56 @@ def tipping():
 
 
     for ante in res:
-        antencentesList.append(obj.FuzzyAntecentes(ante[0],ante[1],ante[2],ante[3],ante[4]))
+        antecedentesList.append(obj.FuzzyAntecentes(ante[0],ante[1],ante[2],ante[3],ante[4]))
        
-
+   
     antecedents = []
-    for ante in antencentesList:
-        x_arange = np.arange(ante.rangomin, ante.rangomax, anto.incremental)
-        antecedent = ctrl.Antecedent(x_arange)
+    for ante in antecedentesList:
+        x_arange = np.arange(ante.rangomin, ante.rangomax, ante.incremental)
+        
+        antecedent = ctrl.Antecedent(list(x_arange), ante.nombre)
+        print(antecedent)
         antecedents.append(antecedent)
 
-    return antecedents
+    reglasLista = []
+    rulesLista = []
+    query = "SELECT condiciones, consecuencia FROM cat_fuzzyrules WHERE consecuenta_id =%s and activo = true ORDER by id"
+    cur.execute(query, (tip.idu,))
+    res = cur.fetchall()
+
+    for rules in res:
+        print(rules[0])
+        reglasLista.append(reglas.FuzzyRegla(rules[0],rules[1]))
+
+    fuzzy_rule_list = reglas.create_fuzzy_rule_list(reglasLista)
+    #for rules in reglasLista:
+    #    print(rules.condiciones)
+    #    print(rules.consecuencia) 
+    #    rulesLista.append(ctrl.Rule(rules.condiciones, rules.consecuencia))
+
+    #rule1 = ctrl.Rule(quality['poor'] | service['poor'], tip['low'])
+    #rule2 = ctrl.Rule(service['average'], tip['medium'])
+    #rule3 = ctrl.Rule(service['good'] | quality['good'], tip['high'])
+
+    # Create a control system
+    #tipping_ctrl = ctrl.ControlSystem([rule1, rule2, rule3])
+
+    tipping_ctrl = ctrl.ControlSystem(fuzzy_rule_list)
+
+    # Create a simulation
+    tipping = ctrl.ControlSystemSimulation(tipping_ctrl)
+
+    tipping.input['calidad'] = quality
+    tipping.input['servicio'] = service
+
+    tipping.compute()
+
+    # Access the output
+    
+    return tipping.output['tip']
 
 
-    # Define universe variables
-    x_quality = np.arange(0, 11, 1)
-    x_service = np.arange(0, 11, 1)
-    x_tip = np.arange(tip.rangomin ,tip.rangomax, tip.incremental)
-    return antencentesList
+    
     
 
 @app.get("/fuzzy")

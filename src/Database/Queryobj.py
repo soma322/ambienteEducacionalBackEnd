@@ -21,3 +21,8 @@ class FuzzyMembresia:
         self.rangomin = rangomin
         self.rangomax = rangomax
         self.rangofinal = rangofinal
+
+class FuzzyReglas:
+    def __init__(self,condiciones,consecuencia):
+        self.condiciones = condiciones
+        self.consecuencia = consecuencia
