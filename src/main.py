@@ -31,32 +31,70 @@ def tipping(quality: int,service: int):
     index = 0
     query = ""
     cur = con.conexion()
-    query = "SELECT id, nombre, rangomin, rangomax, incremental FROM ctl_fuzzyconsecuencias where nombre ilike 'tip' and activo = true"
+
+    tipMembresias = {}
+    tipObj = {}
+    query = "SELECT id, nombre, rangomin::integer, rangomax::integer, incremental::integer FROM ctl_fuzzyconsecuencias where nombre ilike 'propina' and activo = true"
     cur.execute(query)
     res = cur.fetchall()
+    
     tip = obj.FuzzyConsequence(res[0][0], res[0][1], res[0][2], res[0][3], res[0][4])
     
     x_tip = np.arange(tip.rangomin, tip.rangomax,tip.incremental)
     tipConsequent = ctrl.Consequent(x_tip,tip.nombre)
     
    
-    
-    query = "SELECT id, nombre, rangomin,rangomax,incremental FROM ctl_fuzzyantecedentes WHERE consecuencia =%s and activo = true ORDER by id"
+
+    query = "SELECT id, nombre, rangomin::integer,rangomax::integer,rangofinal::integer FROM ctl_fuzzymembresia WHERE consecuencia =%s and activo = true ORDER by id"
+    cur.execute(query, (tip.idu,))
+    res = cur.fetchall()
+    for mem in res:
+        tipConsequent[mem[1]] = fuzz.trimf(tipConsequent.universe,[mem[2],mem[3],mem[4]])
+       
+    tipObj[tip.nombre] = tipConsequent
+ 
+
+    antecentesObj = {}
+    query = "SELECT id, nombre, rangomin::integer,rangomax::integer,incremental::integer FROM ctl_fuzzyantecedentes WHERE consecuencia =%s and activo = true ORDER by id"
     cur.execute(query, (tip.idu,))
     res = cur.fetchall()
 
 
     for ante in res:
         antecedentesList.append(obj.FuzzyAntecentes(ante[0],ante[1],ante[2],ante[3],ante[4]))
+        
        
    
+    
     antecedents = []
+    membresias  = {}
+    membresiasObj  ={}
     for ante in antecedentesList:
         x_arange = np.arange(ante.rangomin, ante.rangomax, ante.incremental)
-        
-        antecedent = ctrl.Antecedent(list(x_arange), ante.nombre)
-        print(antecedent)
-        antecedents.append(antecedent)
+        antecedent = ctrl.Antecedent(x_arange, ante.nombre)
+        query = "SELECT antecedente, nombre, rangomin::integer, rangomax::integer, rangofinal::integer FROM ctl_fuzzymembresia where antecedente=%s and activo = true"
+        cur.execute(query, (ante.idu,))
+        res = cur.fetchall()
+        for mem in res:
+            antecedent[mem[1]] = fuzz.trimf(antecedent.universe,[mem[2],mem[3],mem[4]])
+            
+            
+        antecentesObj[ante.nombre] = antecedent
+        #antecedents.append(antecentesObj)
+        #antecentesObj = {}
+
+    
+
+    #calidad_pobre = antecentesObj['calidad']['pobre']
+    #servicio_pobre = antecentesObj['servicio']['pobre']
+    #propina_bajo = tipObj['propina']['bajo']
+
+    #print (calidad_pobre)
+    #print (servicio_pobre)
+    # Create the fuzzy rule
+    #rule1 = ctrl.Rule(calidad_pobre or servicio_pobre, propina_bajo)
+     
+
 
     reglasLista = []
     rulesLista = []
@@ -65,10 +103,12 @@ def tipping(quality: int,service: int):
     res = cur.fetchall()
 
     for rules in res:
-        print(rules[0])
+        
         reglasLista.append(reglas.FuzzyRegla(rules[0],rules[1]))
 
-    fuzzy_rule_list = reglas.create_fuzzy_rule_list(reglasLista)
+    fuzzy_rule_list = reglas.create_fuzzy_rule_list(tipObj,antecentesObj,reglasLista)
+    
+    return 'ok'
     #for rules in reglasLista:
     #    print(rules.condiciones)
     #    print(rules.consecuencia) 
@@ -129,12 +169,13 @@ def check_fuzzy():
     
 
     
-
+    print(quality['poor'])
+    print(service['poor'])
    
 
     # Define fuzzy rules
     rule1 = ctrl.Rule(quality['poor'] | service['poor'], tip['low'])
-    rule2 = ctrl.Rule(service['average'], tip['medium'])
+    rule2 = ctrl.Rule(quality['average'] & service['average'], tip['medium'])
     rule3 = ctrl.Rule(service['good'] | quality['good'], tip['high'])
 
     # Create a control system
