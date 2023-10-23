@@ -1,19 +1,21 @@
-import sys
+
 from typing import Union
 from fastapi import FastAPI
 import numpy as np
 import skfuzzy as fuzz
-import os
+
 from skfuzzy import control as ctrl
 
-
+import json
+import src.Model.ApiModel as model
+import src.Controller.ApiController as controller
 from src.Database import Conexiones as con
 from src.Database import Queryobj as obj
 from src.Model.FuzzyReglas    import Reglas  as reglas
 
 app = FastAPI()
 
-
+from src.Controller.ApiController import *
 @app.get("/")
 def read_root():
     return {"Hey!": "Hello Kixe <3, please send me your credit card information"}
@@ -25,6 +27,13 @@ def conexion():
     rows = cur.fetchall()
     colnames = [desc[0] for desc in cur.description]
     return rows
+
+@app.post("/fuzzy")
+def FuzzyEngine(json: dict):
+    response = controller.FuzzyEngine(json)
+    return response
+
+
 @app.get("/tipping/{quality}/{service}")
 def tipping(quality: int,service: int):
     antecedentesList = []
@@ -99,67 +108,6 @@ def tipping(quality: int,service: int):
     return tipping.output['propina']
     
 
-@app.get("/fuzzy2")
-def check_fuzzy():
-    # Define universe variables
-    x_quality = np.arange(0, 11, 1)
-    x_service = np.arange(0, 11, 1)
-    x_tip = np.arange(0, 26, 1)
-
-    # Create antecedent and consequent objects
-    quality = ctrl.Antecedent(x_quality, 'quality')
-    # Define membership functions for 'quality'
-    quality['poor'] = fuzz.trimf(quality.universe, [0, 0, 5])
-    quality['average'] = fuzz.trimf(quality.universe, [0, 5, 10])
-    quality['good'] = fuzz.trimf(quality.universe, [5, 10, 10])
-
-    service = ctrl.Antecedent(x_service, 'service')
-    # Define membership functions for 'service'
-    service['poor'] = fuzz.trimf(service.universe, [0, 0, 5])
-    service['average'] = fuzz.trimf(service.universe, [0, 5, 10])
-    service['good'] = fuzz.trimf(service.universe, [5, 10, 10])
-
-
-    tip = ctrl.Consequent(x_tip, 'tip')
-     # Define membership functions for 'tip' (consequent)
-    tip['low'] = fuzz.trimf(tip.universe, [0, 0, 5])
-    tip['medium'] = fuzz.trimf(tip.universe, [0, 5, 10])
-    tip['high'] = fuzz.trimf(tip.universe, [5, 10, 10])
-
-    
-
-    
-    
-   
-
-    # Define fuzzy rules
-    rule1 = ctrl.Rule(quality['poor'] | service['poor'], tip['low'])
-    rule2 = ctrl.Rule(quality['average'] & service['average'], tip['medium'])
-    rule3 = ctrl.Rule(service['good'] | quality['good'], tip['high'])
-
-    # Create a control system
-    var = []
-    var.append(rule1)
-    var.append(rule2)
-    var.append(rule3)
-    print(var)
-    tipping_ctrl = ctrl.ControlSystem(var)
-
-    # Create a simulation
-    tipping = ctrl.ControlSystemSimulation(tipping_ctrl)
-
-    # Input values
-    tipping.input['quality'] = 6.5
-    tipping.input['service'] = 9.8
-
-    # Compute the output
-    tipping.compute()
-
-    # Access the output
-    
-    return tipping.output['tip']
-    
-
 @app.get("/fuzzy")
 def check_fuzzy():
     # Define universe variables
@@ -170,22 +118,23 @@ def check_fuzzy():
     # Create antecedent and consequent objects
     quality = ctrl.Antecedent(x_quality, 'quality')
     # Define membership functions for 'quality'
-    quality['poor'] = fuzz.trimf(quality.universe, [0, 0, 5])
-    quality['average'] = fuzz.trimf(quality.universe, [0, 5, 10])
-    quality['good'] = fuzz.trimf(quality.universe, [5, 10, 10])
+    #quality['poor'] = fuzz.trimf(quality.universe, [0, 0, 5])
+    #quality['average'] = fuzz.trimf(quality.universe, [0, 5, 10])
+    #quality['good'] = fuzz.trimf(quality.universe, [5, 10, 10])
 
     service = ctrl.Antecedent(x_service, 'service')
     # Define membership functions for 'service'
-    service['poor'] = fuzz.trimf(service.universe, [0, 0, 5])
-    service['average'] = fuzz.trimf(service.universe, [0, 5, 10])
-    service['good'] = fuzz.trimf(service.universe, [5, 10, 10])
+    #service['poor'] = fuzz.trimf(service.universe, [0, 0, 5])
+    #service['average'] = fuzz.trimf(service.universe, [0, 5, 10])
+    #service['good'] = fuzz.trimf(service.universe, [5, 10, 10])
 
-
+    quality.automf(3)
+    service.automf(3)
     tip = ctrl.Consequent(x_tip, 'tip')
      # Define membership functions for 'tip' (consequent)
-    tip['low'] = fuzz.trimf(tip.universe, [0, 0, 5])
-    tip['medium'] = fuzz.trimf(tip.universe, [0, 5, 10])
-    tip['high'] = fuzz.trimf(tip.universe, [5, 10, 10])
+    tip['low'] = fuzz.trimf(tip.universe, [0, 0, 13])
+    tip['medium'] = fuzz.trimf(tip.universe, [0, 13, 25])
+    tip['high'] = fuzz.trimf(tip.universe, [13, 25, 25])
 
     
 
@@ -195,7 +144,7 @@ def check_fuzzy():
 
     # Define fuzzy rules
     rule1 = ctrl.Rule(quality['poor'] | service['poor'], tip['low'])
-    rule2 = ctrl.Rule(quality['average'] & service['average'], tip['medium'])
+    rule2 = ctrl.Rule(quality['average'], tip['medium'])
     rule3 = ctrl.Rule(service['good'] | quality['good'], tip['high'])
 
     # Create a control system
@@ -210,14 +159,15 @@ def check_fuzzy():
     tipping = ctrl.ControlSystemSimulation(tipping_ctrl)
 
     # Input values
-    tipping.input['quality'] = 6.5
-    tipping.input['service'] = 9.8
+    tipping.input['quality'] = 5
+    tipping.input['service'] = 9
 
     # Compute the output
     tipping.compute()
 
     # Access the output
-    
+    print(tipping.output['tip'])
+    tip.view(sim=tipping)
     return tipping.output['tip']
 
 
