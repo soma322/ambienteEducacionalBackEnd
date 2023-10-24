@@ -10,7 +10,7 @@ def FuzzyConsecuencias(json):
     cur = con.conexion()
     response = {}
     consecuencia = {}
-    query = "SELECT id, nombre, rangomin::integer, rangomax::integer, incremental::integer FROM ctl_fuzzyconsecuencias where nombre ilike %s and activo = true"
+    query = "SELECT id, nombre, rangomin , rangomax , incremental  FROM ctl_fuzzyconsecuencias where nombre ilike %s and activo = true"
     cur.execute(query,(json.get("consecuencia"),))
     res = cur.fetchall()
     
@@ -29,7 +29,7 @@ def FuzzyAntecedentes(consecuenciaDatos):
     antecedentesList = []
     response = None
     antecentesObj = {}
-    query = "SELECT id, nombre, rangomin::integer,rangomax::integer,incremental::integer FROM ctl_fuzzyantecedentes WHERE consecuencia =%s and activo = true ORDER by id"
+    query = "SELECT id, nombre, rangomin ,rangomax ,incremental  FROM ctl_fuzzyantecedentes WHERE consecuencia =%s and activo = true ORDER by id"
     cur.execute(query, (consecuenciaDatos.idu,))
     res = cur.fetchall()
 
@@ -47,9 +47,9 @@ def FuzzyMembresias(tipo, queryParametros,ConAntParametros):
     cur = con.conexion()
     response = {}
     if(tipo == 1):
-        query = "SELECT id, nombre, rangomin::integer,rangomax::integer,rangofinal::integer FROM ctl_fuzzymembresia WHERE consecuencia =%s and activo = true ORDER by id"
+        query = "SELECT id, nombre, rangomin ,rangomax ,rangofinal  FROM ctl_fuzzymembresia WHERE consecuencia =%s and activo = true ORDER by id"
     else:
-        query = "SELECT id, nombre, rangomin::integer,rangomax::integer,rangofinal::integer FROM ctl_fuzzymembresia WHERE antecedente =%s and activo = true ORDER by id"
+        query = "SELECT id, nombre, rangomin ,rangomax ,rangofinal  FROM ctl_fuzzymembresia WHERE antecedente =%s and activo = true ORDER by id"
     
     cur.execute(query, (queryParametros.idu,))
     res = cur.fetchall()
@@ -70,9 +70,6 @@ def FuzzyReglas(queryParametros,consecuencia,antecedentes):
 
     for rules in res:
         reglasLista.append(reglas.FuzzyRegla(rules[0],rules[1]))
-    print(consecuencia)
-    print(antecedentes)
-    print(reglasLista)
     fuzzy_rule_list = reglas.create_fuzzy_rule_list(consecuencia,antecedentes,reglasLista)
 
     tipping_ctrl = ctrl.ControlSystem(fuzzy_rule_list)

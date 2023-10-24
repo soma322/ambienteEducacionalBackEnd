@@ -30,8 +30,7 @@ def conexion():
 
 @app.post("/fuzzy")
 def FuzzyEngine(json: dict):
-    response = controller.FuzzyEngine(json)
-    return response
+    return controller.FuzzyEngine(json)
 
 
 @app.get("/tipping/{quality}/{service}")
