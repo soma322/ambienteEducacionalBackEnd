@@ -20,10 +20,7 @@ insert into ctl_fuzzymembresia (antecedente, nombre, rangomin,rangomax, rangofin
 insert into ctl_fuzzymembresia (antecedente, nombre, rangomin,rangomax, rangofinal )  values (2,'bueno',5,10,10);
 
 
-insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad[''pobre''] | servicio[''pobre'']', 'propina[''pobre'']');
-insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad[''promedio''] | servicio[''promedio'']', 'propina[''promedio'']');
-insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad[''bueno''] | servicio[''bueno'']', 'propina[''bueno'']');
-
-insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad[pobre] | servicio[pobre]', 'propina[pobre]');
-insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad[promedio] | servicio[promedio]', 'propina[promedio]');
-insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad[bueno] | servicio[bueno]', 'propina[bueno]');
+insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad pobre & servicio pobre & ambiente pobre', 'propina bajo');
+insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad promedio & servicio promedio', 'propina medio');
+insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad promedio', 'propina medio');
+insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad bueno | servicio bueno ', 'propina alto');
