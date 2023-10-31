@@ -12,6 +12,8 @@ import src.Controller.ApiController as controller
 from src.Database import Conexiones as con
 from src.Database import Queryobj as obj
 from src.Model.FuzzyReglas    import Reglas  as reglas
+import google_bard
+
 
 app = FastAPI()
 
@@ -31,6 +33,16 @@ def conexion():
 @app.post("/fuzzy")
 def FuzzyEngine(json: dict):
     return controller.FuzzyEngine(json)
+
+
+@app.get("/bard")
+def bard():
+    API_KEY = "YOUR_API_KEY"
+    query = "What is the meaning of life?"
+    response = google_bard.generate_text(query, api_key=API_KEY)
+    print("Google Bard Response (Using google_bard Module):")
+    print(response)
+    return response
 
 
 @app.get("/tipping/{quality}/{service}")

@@ -1,5 +1,6 @@
 create table ctl_fuzzymembresia(
 id serial PRIMARY KEY,
+consecuencia integer not null
 antecedente integer not null,
 nombre varchar not null,
 rangomin float not null,
