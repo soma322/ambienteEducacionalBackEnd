@@ -48,15 +48,15 @@ def FuzzyMembresias(tipo, queryParametros,ConAntParametros):
     cur = con.conexion()
     response = {}
     if(tipo == 1):
-        query = "SELECT id, nombre, rangomin ,rangomax ,rangofinal,tipo  FROM ctl_fuzzymembresia WHERE consecuencia =%s and activo = true ORDER by id"
+        query = "SELECT mem.nombre, mem.rango1,mem.rango2,  mem.rango3, mem.rango4 ,tip.nombre as tipo  FROM ctl_fuzzymembresia mem INNER JOIN cat_tipos_membresias tip ON tip.id = mem.tipo WHERE mem.consecuencia =%s and mem.activo = true ORDER by mem.id"
     else:
-        query = "SELECT id, nombre, rangomin ,rangomax ,rangofinal,tipo  FROM ctl_fuzzymembresia WHERE antecedente =%s and activo = true ORDER by id"
+        query = "SELECT mem.nombre, mem.rango1,mem.rango2,  mem.rango3, mem.rango4 ,tip.nombre as tipo  FROM ctl_fuzzymembresia mem INNER JOIN cat_tipos_membresias tip ON tip.id = mem.tipo WHERE mem.antecedente =%s and mem.activo = true ORDER by mem.id"
     
     cur.execute(query, (queryParametros.idu,))
     res = cur.fetchall()
     for mem in res:
         #ConAntParametros[mem[1]] = fuzz.trimf(ConAntParametros.universe,[mem[2],mem[3],mem[4]])
-       ConAntParametros[mem[1]] = tipos.FuzzyTipo(ConAntParametros,mem[2],mem[3],mem[4])
+       ConAntParametros[mem[0]] = tipos.FuzzyTipo(ConAntParametros,mem[5],mem[1],mem[2],mem[3],mem[4])
     
     cur.close()
    
