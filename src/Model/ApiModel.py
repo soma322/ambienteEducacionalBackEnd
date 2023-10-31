@@ -5,6 +5,7 @@ from src.Model.FuzzyReglas import Reglas  as reglas
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
+from src.Model.FuzzyTipoMembresias import FuzzyTipos  as tipos
 
 def FuzzyConsecuencias(json):
     cur = con.conexion()
@@ -47,15 +48,15 @@ def FuzzyMembresias(tipo, queryParametros,ConAntParametros):
     cur = con.conexion()
     response = {}
     if(tipo == 1):
-        query = "SELECT id, nombre, rangomin ,rangomax ,rangofinal  FROM ctl_fuzzymembresia WHERE consecuencia =%s and activo = true ORDER by id"
+        query = "SELECT id, nombre, rangomin ,rangomax ,rangofinal,tipo  FROM ctl_fuzzymembresia WHERE consecuencia =%s and activo = true ORDER by id"
     else:
-        query = "SELECT id, nombre, rangomin ,rangomax ,rangofinal  FROM ctl_fuzzymembresia WHERE antecedente =%s and activo = true ORDER by id"
+        query = "SELECT id, nombre, rangomin ,rangomax ,rangofinal,tipo  FROM ctl_fuzzymembresia WHERE antecedente =%s and activo = true ORDER by id"
     
     cur.execute(query, (queryParametros.idu,))
     res = cur.fetchall()
     for mem in res:
-        ConAntParametros[mem[1]] = fuzz.trimf(ConAntParametros.universe,[mem[2],mem[3],mem[4]])
-       
+        #ConAntParametros[mem[1]] = fuzz.trimf(ConAntParametros.universe,[mem[2],mem[3],mem[4]])
+       ConAntParametros[mem[1]] = tipos.FuzzyTipo(ConAntParametros,mem[2],mem[3],mem[4])
     
     cur.close()
    
