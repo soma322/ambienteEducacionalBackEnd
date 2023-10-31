@@ -7,18 +7,18 @@ insert into ctl_fuzzyantecedentes(consecuencia,membresias,nombre,rangomin,rangom
 
 
 
-insert into ctl_fuzzymembresia (consecuencia,antecedente, nombre, rangomin,rangomax, rangofinal )  values (1,0,'bajo',0,0,5);
-insert into ctl_fuzzymembresia (consecuencia,antecedente, nombre, rangomin,rangomax, rangofinal )  values (1,0,'medio',0,5,10);
-insert into ctl_fuzzymembresia (consecuencia,antecedente, nombre, rangomin,rangomax, rangofinal )  values (1,0,'alto',5,10,10)
 
-insert into ctl_fuzzymembresia (consecuencia,antecedente, nombre, rangomin,rangomax, rangofinal )  values (0,1,'pobre',0,0,5);
-insert into ctl_fuzzymembresia (consecuencia,antecedente, nombre, rangomin,rangomax, rangofinal )  values (0,1,'promedio',0,5,10);
-insert into ctl_fuzzymembresia (consecuencia,antecedente, nombre, rangomin,rangomax, rangofinal )  values (0,1,'bueno',5,10,10);
+insert into ctl_fuzzymembresia (consecuencia,antecedente,tipo, nombre, rangomin,rangomax, rangofinal )  values (1,0,1,'bajo',0,0,5);
+insert into ctl_fuzzymembresia (consecuencia,antecedente,tipo, nombre, rangomin,rangomax, rangofinal )  values (1,0,1,'medio',0,5,10);
+insert into ctl_fuzzymembresia (consecuencia,antecedente,tipo, nombre, rangomin,rangomax, rangofinal )  values (1,0,1,'alto',5,10,10);
 
+insert into ctl_fuzzymembresia (consecuencia,antecedente,tipo, nombre, rangomin,rangomax, rangofinal )  values (0,1,1,'pobre',0,0,5);
+insert into ctl_fuzzymembresia (consecuencia,antecedente,tipo, nombre, rangomin,rangomax, rangofinal )  values (0,1,1,'promedio',0,5,10);
+insert into ctl_fuzzymembresia (consecuencia,antecedente,tipo, nombre, rangomin,rangomax, rangofinal )  values (0,1,1,'bueno',5,10,10);
 
-insert into ctl_fuzzymembresia (consecuencia,antecedente, nombre, rangomin,rangomax, rangofinal )  values (0,2,'pobre',0,0,5);
-insert into ctl_fuzzymembresia (consecuencia,antecedente, nombre, rangomin,rangomax, rangofinal )  values (0,2,'promedio',0,5,10);
-insert into ctl_fuzzymembresia (consecuencia,antecedente, nombre, rangomin,rangomax, rangofinal )  values (0,2,'bueno',5,10,10);
+insert into ctl_fuzzymembresia (consecuencia,antecedente,tipo, nombre, rangomin,rangomax, rangofinal )  values (0,2,1,'pobre',0,0,5);
+insert into ctl_fuzzymembresia (consecuencia,antecedente,tipo, nombre, rangomin,rangomax, rangofinal )  values (0,2,1,'promedio',0,5,10);
+insert into ctl_fuzzymembresia (consecuencia,antecedente,tipo, nombre, rangomin,rangomax, rangofinal )  values (0,2,1,'bueno',5,10,10);
 
 
 insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'calidad pobre & servicio pobre & ambiente pobre', 'propina bajo');
