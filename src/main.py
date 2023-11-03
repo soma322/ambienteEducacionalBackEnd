@@ -56,6 +56,10 @@ def materias():
 def nivelMateria(idusuario: int,idmateria:int ):
     return controller.nivelMateria(idusuario,idmateria)
 
+@app.post("/guardarnivel")
+def guardarnivel(json:dict):
+    return controller.guardarnivel(json)
+
 @app.get("/tipping/{quality}/{service}")
 def tipping(quality: int,service: int):
     antecedentesList = []

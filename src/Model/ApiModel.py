@@ -174,4 +174,21 @@ def nivelMateria(idusuario: int,idmateria:int):
 
         response['response'].append(queryArray)
 
+    if(len(response['response']) == 0):
+        response['response'].append({'nivel': 1})
     return response
+
+def guardarnivel(json: dict):
+    response = { } 
+    cur = con.conexion()
+    queryArray = []
+    query = "select resultado from fun_guardarnivel(%s,%s,%s)"
+    cur.execute(query,(json.get('nivel'),json.get('idusuario'),json.get('materia')),)
+    res = cur.fetchall()
+   
+    for mat in res:
+        response['response'] = mat
+    
+
+    return response
+

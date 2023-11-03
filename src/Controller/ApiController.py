@@ -27,3 +27,6 @@ def materias():
 
 def nivelMateria(idusuario: int,idmateria:int):
     return model.nivelMateria(idusuario,idmateria)
+
+def guardarnivel(json: dict):
+    return model.guardarnivel(json)

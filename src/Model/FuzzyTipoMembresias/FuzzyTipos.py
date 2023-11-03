@@ -28,7 +28,6 @@ def FuzzyTipo(ConAntParametros,tipo,rango1,rango2,rango3,rango4):
         case "zmf":
             response = fuzz.zmf(ConAntParametros.universe,[rango1,rango4])
         case _:
-            print("hello")
             response = fuzz.trimf(ConAntParametros.universe,[rango1,rango3,rango4])
 
     return response
