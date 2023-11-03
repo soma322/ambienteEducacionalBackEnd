@@ -9,7 +9,7 @@ from src.Model.FuzzyTipoMembresias import FuzzyTipos  as tipos
 import random
 import math
 def FuzzyConsecuencias(json):
-    cur = con.conexion()
+    cur,connection = con.conexion()
     response = {}
     consecuencia = {}
     query = "SELECT id, nombre, rangomin , rangomax , incremental  FROM ctl_fuzzyconsecuencias where nombre ilike %s and activo = true"
@@ -27,7 +27,7 @@ def FuzzyConsecuencias(json):
     return response
 
 def FuzzyAntecedentes(consecuenciaDatos):
-    cur = con.conexion()
+    cur,connection = con.conexion()
     antecedentesList = []
     response = None
     antecentesObj = {}
@@ -46,7 +46,7 @@ def FuzzyAntecedentes(consecuenciaDatos):
     return antecentesObj
 
 def FuzzyMembresias(tipo, queryParametros,ConAntParametros):
-    cur = con.conexion()
+    cur,connection = con.conexion()
     response = {}
     if(tipo == 1):
         query = "SELECT mem.nombre, mem.rango1,mem.rango2,  mem.rango3, mem.rango4 ,tip.nombre as tipo  FROM ctl_fuzzymembresia mem INNER JOIN cat_tipos_membresias tip ON tip.id = mem.tipo WHERE mem.consecuencia =%s and mem.activo = true ORDER by mem.id"
@@ -65,7 +65,7 @@ def FuzzyMembresias(tipo, queryParametros,ConAntParametros):
 
 def FuzzyReglas(queryParametros,consecuencia,antecedentes):
     reglasLista = []
-    cur = con.conexion()
+    cur,connection = con.conexion()
     query = "SELECT condiciones, consecuencia FROM cat_fuzzyrules WHERE consecuenta_id =%s and activo = true ORDER by id"
     cur.execute(query, (queryParametros.idu,))
     res = cur.fetchall()
@@ -91,7 +91,7 @@ def FuzzyOutPut(json,ControlSystem):
 def login(json):
     response = {}
     
-    cur = con.conexion()
+    cur,connection = con.conexion()
     query = "SELECT nombre,apellido_paterno,apellido_materno,descripcion, rol, privilegio,idu FROM fun_consultaloginadmin(%s,%s)"
     cur.execute(query, (json.get('usuario'), json.get('contrasena'),))
     res = cur.fetchall()
@@ -111,7 +111,7 @@ def preguntas(materia,nivel):
     response = {'preguntas': []} 
     preguntasArray = []
     indexCorrecta = 1
-    cur = con.conexion()
+    cur,connection = con.conexion()
     query = """select a.nivel,a.pregunta,b.respuesta,b.incorrecta1, b.incorrecta2, b.incorrecta3 , c.ayuda
                 from cat_preguntas a 
                 inner join cat_respuestas b on a.id=b.id_pregunta 
@@ -148,7 +148,7 @@ def preguntas(materia,nivel):
 
 def materias():
     response = {'response': []} 
-    cur = con.conexion()
+    cur,connection = con.conexion()
     queryArray = []
     query = "SELECT idu,upper(des_materia) FROM cat_materias where activo = true"
     cur.execute(query)
@@ -163,7 +163,7 @@ def materias():
 
 def nivelMateria(idusuario: int,idmateria:int):
     response = {'response': []} 
-    cur = con.conexion()
+    cur,connection = con.conexion()
     queryArray = []
     query = "SELECT nivel FROM ctl_materias where idu_alumno =%s AND idu_materia = %s"
     cur.execute(query,(idusuario,idmateria),)
@@ -180,15 +180,30 @@ def nivelMateria(idusuario: int,idmateria:int):
 
 def guardarnivel(json: dict):
     response = { } 
-    cur = con.conexion()
+    cur,connection = con.conexion()
     queryArray = []
-    query = "select resultado from fun_guardarnivel(%s,%s,%s)"
-    cur.execute(query,(json.get('nivel'),json.get('idusuario'),json.get('materia')),)
-    res = cur.fetchall()
+    query = "SELECT count(1) as contador FROM ctl_materias where idu_alumno =%s AND idu_materia = %s"
+    cur.execute(query,(json.get('idusuario'),json.get('materia')),)
+    contador = cur.rowcount
    
-    for mat in res:
-        response['response'] = mat
-    
+    print(json)
+    if(contador > 0):
+        query = "UPDATE ctl_materias SET nivel=%s, fecha_modificacion=NOW() WHERE idu_alumno=%s AND idu_materia=%s"
+        values = (json.get('nivel'), json.get('idusuario'), json.get('materia'))
+        cur.execute(query, values)
+        con.commit(connection)
+        affected_rows = cur.rowcount
+        print(affected_rows)
 
+    if(contador == 0):
+        query = "insert into ctl_materias (nivel,idu_alumno,idu_materia) values (%s,%s,%s)"
+        cur.execute(query,(json.get('nivel'),json.get('idusuario'),json.get('materia')),)
+        con.commit(connection)
+        affected_rows = cur.rowcount
+        
+
+
+    
+    response['response'] = affected_rows
     return response
 

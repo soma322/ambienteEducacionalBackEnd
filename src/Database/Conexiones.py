@@ -26,10 +26,16 @@ def conexion():
         # Create a cursor object to interact with the database
         cursor = connection.cursor()
         cur = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        return cur
+        return cur,connection
 
         
        
 
     except psycopg2.Error as error:
         print("Error connecting to the database:", error)
+def commit(connection):
+    if connection:
+        try:
+            connection.commit()
+        except psycopg2.Error as error:
+            print("Error committing changes to the database:", error)
