@@ -7,6 +7,7 @@ import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 from src.Model.FuzzyTipoMembresias import FuzzyTipos  as tipos
 import random
+import math
 def FuzzyConsecuencias(json):
     cur = con.conexion()
     response = {}
@@ -84,24 +85,25 @@ def FuzzyOutPut(json,ControlSystem):
 
     simulacion.compute()
     output = simulacion.output[json.get('consecuencia')]
-    return output
+    return math.floor(output)
 
 
 def login(json):
     response = {}
     
     cur = con.conexion()
-    query = "SELECT nombre,apellido_paterno,apellido_materno,descripcion, rol, privilegio FROM fun_consultaloginadmin(%s,%s)"
+    query = "SELECT nombre,apellido_paterno,apellido_materno,descripcion, rol, privilegio,idu FROM fun_consultaloginadmin(%s,%s)"
     cur.execute(query, (json.get('usuario'), json.get('contrasena'),))
     res = cur.fetchall()
 
     for user in res:
-        response['nombre'] = user[0]
+        response['nombre']           = user[0]
         response['apellido_paterno'] = user[1]
         response['apellido_materno'] = user[2]
-        response['descripcion'] = user[3]
-        response['rol'] = user[4]
-        response['privilegio'] = user[5]
+        response['descripcion']      = user[3]
+        response['rol']              = user[4]
+        response['privilegio']       = user[5]
+        response['id']               = user[6]
 
     return response
 
@@ -110,7 +112,11 @@ def preguntas(materia,nivel):
     preguntasArray = []
     indexCorrecta = 1
     cur = con.conexion()
-    query = "select a.nivel,a.pregunta,b.respuesta,b.incorrecta1, b.incorrecta2, b.incorrecta3 from cat_preguntas a inner join cat_respuestas b on a.id=b.id_pregunta WHERE a.id_materia=%s  AND a.nivel BETWEEN 1 AND %s ORDER BY RANDOM() LIMIT 1"
+    query = """select a.nivel,a.pregunta,b.respuesta,b.incorrecta1, b.incorrecta2, b.incorrecta3 , c.ayuda
+                from cat_preguntas a 
+                inner join cat_respuestas b on a.id=b.id_pregunta 
+                inner join cat_ayuda c on a.id=c.pregunta_id 
+                WHERE a.id_materia=%s  AND a.nivel BETWEEN 1 AND %s ORDER BY RANDOM() LIMIT 1"""
     cur.execute(query, (materia,nivel,))
     res = cur.fetchall()
     
@@ -130,29 +136,42 @@ def preguntas(materia,nivel):
             'nivel': preg[0],
             'pregunta': preg[1],
             'respuestas': preguntasArray,
+            'ayuda': preg[6],
             'correcta': indexCorrecta
         }
 
-        response['preguntas'].append(pregunta)
+        response['preguntas'] = pregunta
         
     
    
     return response
 
 def materias():
-    response = {}
+    response = {'response': []} 
     cur = con.conexion()
-
-    query = "SELECT nombre,apellido_paterno,apellido_materno,descripcion, rol, privilegio FROM fun_consultaloginadmin(%s,%s)"
-    cur.execute(query, (json.get('usuario'), json.get('contrasena'),))
+    queryArray = []
+    query = "SELECT idu,upper(des_materia) FROM cat_materias where activo = true"
+    cur.execute(query)
     res = cur.fetchall()
 
-    for user in res:
-        response['nombre'] = user[0]
-        response['apellido_paterno'] = user[1]
-        response['apellido_materno'] = user[2]
-        response['descripcion'] = user[3]
-        response['rol'] = user[4]
-        response['privilegio'] = user[5]
+    for mat in res:
+        queryArray = {'id': mat[0],'nombre': mat[1]}
+
+        response['response'].append(queryArray)
+
+    return response
+
+def nivelMateria(idusuario: int,idmateria:int):
+    response = {'response': []} 
+    cur = con.conexion()
+    queryArray = []
+    query = "SELECT nivel FROM ctl_materias where idu_alumno =%s AND idu_materia = %s"
+    cur.execute(query,(idusuario,idmateria),)
+    res = cur.fetchall()
+
+    for mat in res:
+        queryArray = {'nivel': mat[0]}
+
+        response['response'].append(queryArray)
 
     return response

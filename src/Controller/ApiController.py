@@ -23,5 +23,7 @@ def preguntas(materia: int,nivel: int):
 
 
 def materias():
+    return model.materias()
 
-    return model.materias(json)
+def nivelMateria(idusuario: int,idmateria:int):
+    return model.nivelMateria(idusuario,idmateria)

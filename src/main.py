@@ -19,7 +19,8 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Replace with your allowed origins
-    allow_methods=["POST"],  # Allow POST requests
+    allow_methods=["POST","GET"],  # Allow POST requests
+    
 )
 from src.Controller.ApiController import *
 @app.get("/")
@@ -49,9 +50,11 @@ def FuzzyEngine(json: dict):
 
 @app.get("/materias")
 def materias():
-    return controller.materias(json)
+    return controller.materias()
 
-
+@app.get("/nivelmateria/{idusuario}/{idmateria}")
+def nivelMateria(idusuario: int,idmateria:int ):
+    return controller.nivelMateria(idusuario,idmateria)
 
 @app.get("/tipping/{quality}/{service}")
 def tipping(quality: int,service: int):

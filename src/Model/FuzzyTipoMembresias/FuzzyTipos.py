@@ -2,6 +2,8 @@ import skfuzzy as fuzz
 def FuzzyTipo(ConAntParametros,tipo,rango1,rango2,rango3,rango4):
     response = None
 
+    
+    tipo = tipo.strip()
     match tipo:
         case "trimf":
             response = fuzz.trimf(ConAntParametros.universe,[rango1,rango3,rango4])
