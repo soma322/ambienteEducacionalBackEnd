@@ -28,6 +28,9 @@ insert into cat_fuzzyrules (consecuenta_id,condiciones,consecuencia) values (1,'
 
 
 
+
+insert into ctl_fuzzyconsecuencias(nombre, rangomin,rangomax,incremental,fechacreacion,fechamodificacion ) values ('nivel',0,11,1,now(),now())
+
 insert into ctl_fuzzyantecedentes(consecuencia, membresias, nombre, rangomin,rangomax,incremental,fechacreacion,fechamodificacion ) values (4,2,'tiempo',0,181,1,now(),now())
 
 insert into ctl_fuzzymembresia(consecuencia, antecedente, tipo,nombre,rango1,rango2,rango3,rango4) values (0,5,1,'bueno',0,0,30,60);
