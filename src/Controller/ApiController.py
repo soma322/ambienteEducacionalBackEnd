@@ -12,3 +12,16 @@ def FuzzyEngine(json: dict):
     response = model.FuzzyOutPut(json,reglas)
 
     return response
+
+def login(json: dict):
+    #TODO verificar los datos del json
+    return model.login(json)
+
+def preguntas(materia: int,nivel: int):
+
+    return model.preguntas(materia,nivel)
+
+
+def materias():
+
+    return model.materias(json)

@@ -6,7 +6,7 @@ import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
 from src.Model.FuzzyTipoMembresias import FuzzyTipos  as tipos
-
+import random
 def FuzzyConsecuencias(json):
     cur = con.conexion()
     response = {}
@@ -85,3 +85,74 @@ def FuzzyOutPut(json,ControlSystem):
     simulacion.compute()
     output = simulacion.output[json.get('consecuencia')]
     return output
+
+
+def login(json):
+    response = {}
+    
+    cur = con.conexion()
+    query = "SELECT nombre,apellido_paterno,apellido_materno,descripcion, rol, privilegio FROM fun_consultaloginadmin(%s,%s)"
+    cur.execute(query, (json.get('usuario'), json.get('contrasena'),))
+    res = cur.fetchall()
+
+    for user in res:
+        response['nombre'] = user[0]
+        response['apellido_paterno'] = user[1]
+        response['apellido_materno'] = user[2]
+        response['descripcion'] = user[3]
+        response['rol'] = user[4]
+        response['privilegio'] = user[5]
+
+    return response
+
+def preguntas(materia,nivel):
+    response = {'preguntas': []} 
+    preguntasArray = []
+    indexCorrecta = 1
+    cur = con.conexion()
+    query = "select a.nivel,a.pregunta,b.respuesta,b.incorrecta1, b.incorrecta2, b.incorrecta3 from cat_preguntas a inner join cat_respuestas b on a.id=b.id_pregunta WHERE a.id_materia=%s  AND a.nivel BETWEEN 1 AND %s ORDER BY RANDOM() LIMIT 1"
+    cur.execute(query, (materia,nivel,))
+    res = cur.fetchall()
+    
+    for preg in res:
+        preguntasArray = [
+                {'correcto':'true','res':preg[2]},
+                {'correcto':'false','res':preg[3]},
+                {'correcto':'false','res':preg[4]},
+                {'correcto':'false','res':preg[5]}
+                ]
+        random.shuffle(preguntasArray)
+        for correcta in preguntasArray:
+            if(correcta['correcto'] == 'true'):
+                break
+            indexCorrecta = indexCorrecta + 1
+        pregunta = {
+            'nivel': preg[0],
+            'pregunta': preg[1],
+            'respuestas': preguntasArray,
+            'correcta': indexCorrecta
+        }
+
+        response['preguntas'].append(pregunta)
+        
+    
+   
+    return response
+
+def materias():
+    response = {}
+    cur = con.conexion()
+
+    query = "SELECT nombre,apellido_paterno,apellido_materno,descripcion, rol, privilegio FROM fun_consultaloginadmin(%s,%s)"
+    cur.execute(query, (json.get('usuario'), json.get('contrasena'),))
+    res = cur.fetchall()
+
+    for user in res:
+        response['nombre'] = user[0]
+        response['apellido_paterno'] = user[1]
+        response['apellido_materno'] = user[2]
+        response['descripcion'] = user[3]
+        response['rol'] = user[4]
+        response['privilegio'] = user[5]
+
+    return response

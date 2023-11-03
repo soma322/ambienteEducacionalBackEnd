@@ -12,11 +12,15 @@ import src.Controller.ApiController as controller
 from src.Database import Conexiones as con
 from src.Database import Queryobj as obj
 from src.Model.FuzzyReglas    import Reglas  as reglas
-
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace with your allowed origins
+    allow_methods=["POST"],  # Allow POST requests
+)
 from src.Controller.ApiController import *
 @app.get("/")
 def read_root():
@@ -30,9 +34,22 @@ def conexion():
     colnames = [desc[0] for desc in cur.description]
     return rows
 
+@app.post("/login")
+def login(json: dict):
+    return controller.login(json)
+
+@app.get("/preguntas/{materia}/{nivel}")
+def preguntas(materia: int,nivel: int):
+    return controller.preguntas(materia,nivel)
+
+
 @app.post("/fuzzy")
 def FuzzyEngine(json: dict):
     return controller.FuzzyEngine(json)
+
+@app.get("/materias")
+def materias():
+    return controller.materias(json)
 
 
 
